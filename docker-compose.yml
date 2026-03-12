@@ -1,0 +1,16 @@
+services:
+  client:
+    container_name: boycott-this-client
+    build:
+      context: .
+      dockerfile: dockerfile
+    image: boycott-this-client
+    volumes:
+      - ./client:/client
+      - /client/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: "production"
+      PORT: "3000"
+    restart: unless-stopped
