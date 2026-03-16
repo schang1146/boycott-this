@@ -3,7 +3,7 @@ services:
     container_name: boycott-this-client
     build:
       context: .
-      dockerfile: dockerfile
+      dockerfile: client/dockerfile
     image: boycott-this-client
     volumes:
       - ./client:/client
@@ -11,6 +11,18 @@ services:
     ports:
       - "3000:3000"
     environment:
-      NODE_ENV: "production"
       PORT: "3000"
+    restart: unless-stopped
+  api:
+    container_name: boycott-this-api
+    build:
+      context: .
+      dockerfile: api/dockerfile
+    image: boycott-this-api
+    volumes:
+      - type: bind
+        source: ./api
+        target: /api
+    ports:
+      - "8000:8000"
     restart: unless-stopped

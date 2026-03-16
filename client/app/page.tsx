@@ -49,7 +49,6 @@ export default function Home() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-white font-sans dark:bg-black">
       <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 sm:items-start">
-        Test
         <Combobox items={companies}>
           <ComboboxInput placeholder="Select an option..." />
           <ComboboxContent>

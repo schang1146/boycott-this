@@ -28,10 +28,9 @@ WORKDIR /client
 COPY --from=dependencies /client/node_modules ./node_modules
 
 # Copy application source code
-COPY ./client .
+COPY ./client ./
 
 # Set environment variables
-ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
@@ -45,6 +44,3 @@ EXPOSE ${PORT}
 
 # Run application
 CMD ["npm", "run", "dev"]
-
-
-
