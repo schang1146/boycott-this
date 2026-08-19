@@ -1,0 +1,65 @@
+FROM python:3.14 AS dependencies
+
+# Set ENV vars
+# The path to the data directory used by Poetry
+ENV POETRY_HOME=/opt/poetry
+# Create the virtualenv inside the project’s root directory
+ENV POETRY_VIRTUALENVS_IN_PROJECT=1
+
+# Set working directory
+WORKDIR /api
+
+# Copy API & Poetry lockfiles
+COPY /api/pyproject.toml /api/poetry.lock ./
+
+# Install Poetry - respects $POETRY_VERSION & $POETRY_HOME
+RUN apt-get update \
+    && apt-get install --no-install-recommends -y \
+    # Dependency for installing Poetry
+    curl \
+    # Dependency for building python dependencies
+    build-essential
+RUN curl -sSL https://install.python-poetry.org | python3 -
+
+# Update PATH to be able to use Poetry
+ENV PATH="$POETRY_HOME/bin:$PATH"
+
+# Install dependencies
+RUN poetry install \
+    # The only dependency groups to include
+    # When --only is specified, --with and --without options are ignored
+    --only main \
+    # Do not install the root package (your project)
+    --no-root \
+    # Skip all directory path dependencies (including transitive ones)
+    --no-directory
+
+FROM python:3.14 AS runner
+
+# Set ENV vars
+ENV POETRY_HOME=/opt/poetry
+# Python no *.pyc files
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# Set PATH to include Poetry
+ENV PATH="$PATH:$POETRY_HOME/bin"
+
+# Set working directory
+WORKDIR /api
+
+# Copy application dependencies from dependencies stage
+COPY --from=dependencies /api ./
+COPY --from=dependencies /api/.venv ./.venv
+COPY --from=dependencies /opt/poetry /opt/poetry
+
+# Add the rest of the application files
+ADD /api ./
+
+# Set environment variables
+ENV PORT=8000
+ENV HOSTNAME="0.0.0.0"
+
+# Expose port 8000 to allow HTTP traffic
+EXPOSE ${PORT}
+
+CMD ["poetry", "run", "fastapi", "run", "src/api/main.py", "--reload"]
